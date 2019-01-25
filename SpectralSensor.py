@@ -11,6 +11,15 @@ class SpectralSensor:
 			write(self.bus,0x07,reg | 0x01)
 		else:
 			write(self.bus,0x07,reg & 0xFE)
+	def ledDrv(self,level):
+		reg = read(self.bus,0x07)
+		if(level >0):
+			reg = reg & 0xCF
+			level = (level -1) << 4
+			write(self.bus,0x07,reg|0x08|level)
+		else :
+			write(self.bus,0x07,reg& 0xF7)
+	
 	def reset(self):
 		reg = read(self.bus,0x04)
 		write(self.bus,0x04,reg|0x80) 
