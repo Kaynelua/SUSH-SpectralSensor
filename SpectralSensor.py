@@ -19,3 +19,17 @@ class SpectralSensor:
 		reg = read(self.bus,0x04)
 		reg = reg & 0xF3
 		write(self.bus,0x04, reg|bank<<2)
+
+	def dataReady(self):
+		reg = read(self.bus,0x04)
+		return bool(reg & 0x02)
+
+	def readChan(self,chan:char):
+		while( not self.dataRead()):
+			pass
+		if(chan=='V'):
+			hi = read(self.bus,0x08)
+			lo = read(self.bus,0x09)
+			return (hi << 16 | lo)
+
+			
