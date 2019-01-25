@@ -8,6 +8,6 @@ class SpectralSensor:
 	def ledInd(self,state:bool):
 		reg = read(self.bus,0x07)
 		if(state):
-			write(self.bus,reg & 0x0F)
+			write(self.bus,0x07,reg | 0x01)
 		else:
-			write(self.bus,reg & 0x0E)
+			write(self.bus,0x07,reg & 0xFE)
