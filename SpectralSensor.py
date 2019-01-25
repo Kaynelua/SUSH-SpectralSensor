@@ -11,3 +11,6 @@ class SpectralSensor:
 			write(self.bus,0x07,reg | 0x01)
 		else:
 			write(self.bus,0x07,reg & 0xFE)
+	def reset(self):
+		reg = read(self.bus,0x04)
+		write(self.bus,0x04,reg|0x80) 
