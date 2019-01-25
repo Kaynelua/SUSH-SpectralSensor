@@ -20,7 +20,7 @@ def read(bus, vaddr:int,):
 	while(bus.read_byte(0x49,0x00) & 0x02):		# check tx_valid bit
 		pass
 	bus.write_byte_data(0x49,0x01, vaddr)		# send vaddr to buffer
-	while(!bus.read_byte(0x49,0x00) & 0x01):		# check rx_valid bit
+	while(not bus.read_byte(0x49,0x00) & 0x01):		# check rx_valid bit
 		pass
 	bus.write_read_data(0x49,0x02, val) 		# read data from buffer
 
