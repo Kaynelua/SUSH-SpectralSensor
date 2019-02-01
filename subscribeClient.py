@@ -1,6 +1,5 @@
-#TO BE USED ON LAPTOP WITH ITS OWN CERT AND KEYS
 import paho.mqtt.client as mqtt
-
+import json
 
 # The callback for when the client receives a CONNACK response from the server.
 def on_connect(client, userdata, flags, rc):
@@ -12,11 +11,15 @@ def on_connect(client, userdata, flags, rc):
 
 # The callback for when a PUBLISH message is received from the server.
 def on_message(client, userdata, msg):
-    print(msg.topic+" "+str(msg.payload))
+    print(msg.topic)
+    strPayload = (msg.payload).decode("utf-8") 
+    info = (json.loads(strPayload))
+    print(info)
+    print(info['sensorReadings'])
 
 client = mqtt.Client()
 client.tls_set(ca_certs="mosquitto.org.crt",
-	certfile="client.crt",keyfile="client.key")
+    certfile="client.crt",keyfile="client.key")
 client.on_connect = on_connect
 client.on_message = on_message
 
