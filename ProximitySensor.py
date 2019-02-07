@@ -10,7 +10,7 @@ import bitstring as bs
 class ProximitySensor:
 	def __init__(self):
 		self.bus = smbus.SMBus(1)
-		self.setledLevel(20)
+		self.setLedLevel(20)
 
 	def getProximity(self):
 		write(self.bus,0x80,0x08)
