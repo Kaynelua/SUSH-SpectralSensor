@@ -27,7 +27,7 @@ def sensorEvent(pin):
 interruptPin = 17
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(interruptPin,GPIO.IN,pull_up_down=GPIO.PUD_UP)
-GPIO.add_event_detect(17,GPIO.FALLING,callback=sensorEvent,bouncetime=3000)
+GPIO.add_event_detect(17,GPIO.FALLING,callback=sensorEvent,bouncetime=2750)
 
 
 
@@ -37,7 +37,6 @@ while(True):
 
 		count = count + 1
 		print("Doing Other Stuff " + str(count))
-		time.sleep(5);
 		p.resetInterrupt()
 	except:
 		GPIO.cleanup()
