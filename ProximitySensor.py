@@ -26,9 +26,14 @@ class ProximitySensor:
 
 	def setInterrupt(self,state=0):
 		if(state):
+			write(self.bus,0x80,0x02)
 			write(self.bus,0x89,2)	# Enable interrupt 
 		else:
+			write(self.bus,0x80,0x00)
 			write(self.bus,0x89,0)  # Disable interrupt 
+
+	def getInterruptStatus(self):
+		return read(self.bus,0x8E)
 
 	def resetInterrupt(self):
 		write(self.bus,0x8E,0)
