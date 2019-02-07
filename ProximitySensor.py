@@ -30,6 +30,9 @@ class ProximitySensor:
 		else:
 			write(self.bus,0x89,0)  # Disable interrupt 
 
+	def resetInterrupt(self):
+		write(self.bus,0x8E,0)
+		
 	def setLowThreshold(self,t):
 		highBits = (0xFF00 & t) >> 6
 		lowBits  = (0x00FF & t)

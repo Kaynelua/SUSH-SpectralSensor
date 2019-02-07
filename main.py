@@ -7,6 +7,7 @@ import Servo as servo
 
 s = ss.SpectralSensor()
 p = ps.ProximitySensor()
+p.setHighThreshold(15000)
 
 def sensorEvent(pin):
 	s.ledDrv(1)
@@ -16,6 +17,7 @@ def sensorEvent(pin):
 	print(r)
 	servo.open()
 	servo.close()
+	p.resetInterrupt()
 
 
 interruptPin = 17
