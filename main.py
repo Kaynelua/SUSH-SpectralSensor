@@ -21,13 +21,14 @@ def sensorEvent(pin):
 	servo.open()
 	time.sleep(0.1)
 	servo.close()
+	GPIO.remove_event_detect(17)
 	p.resetInterrupt()
-
+	GPIO.add_event_detect(17,GPIO.FALLING,callback=sensorEvent)
 
 interruptPin = 17
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(interruptPin,GPIO.IN,pull_up_down=GPIO.PUD_UP)
-GPIO.add_event_detect(17,GPIO.FALLING,callback=sensorEvent,bouncetime=2750)
+GPIO.add_event_detect(17,GPIO.FALLING,callback=sensorEvent)
 
 
 
