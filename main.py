@@ -34,10 +34,8 @@ GPIO.add_event_detect(17,GPIO.FALLING,callback=sensorEvent,bouncetime=2750)
 count = 0
 while(True):
 	try:
-
 		count = count + 1
 		print("Doing Other Stuff " + str(count))
-		p.resetInterrupt()
 	except:
 		GPIO.cleanup()
 
