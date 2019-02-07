@@ -7,8 +7,10 @@ import Servo as servo
 
 s = ss.SpectralSensor()
 p = ps.ProximitySensor()
-p.proxInterrupt(1)
+
 p.setHighThreshold(15000)
+p.setInterrupt(1)
+
 
 def sensorEvent(pin):
 	s.ledDrv(1)
@@ -17,6 +19,7 @@ def sensorEvent(pin):
 	s.ledDrv(0)
 	print(r)
 	servo.open()
+	time.sleep(0.1)
 	servo.close()
 	p.resetInterrupt()
 
@@ -24,16 +27,18 @@ def sensorEvent(pin):
 interruptPin = 17
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(interruptPin,GPIO.IN,pull_up_down=GPIO.PUD_UP)
-GPIO.add_event_detect(17,GPIO.FALLING,callback=sensorEvent)
+GPIO.add_event_detect(17,GPIO.FALLING,callback=sensorEvent,bouncetime=3000)
 
 
 
 count = 0
 while(True):
 	try:
+
 		count = count + 1
 		print("Doing Other Stuff " + str(count))
-		time.sleep(0.1);
+		time.sleep(5);
+		p.resetInterrupt()
 	except:
 		GPIO.cleanup()
 
