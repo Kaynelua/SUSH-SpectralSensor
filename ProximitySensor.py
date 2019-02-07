@@ -10,7 +10,7 @@ import bitstring as bs
 class ProximitySensor:
 	def __init__(self):
 		self.bus = smbus.SMBus(1)
-		self.ledLevel(20)
+		self.setledLevel(20)
 
 	def getProximity(self):
 		write(self.bus,0x80,0x08)
@@ -42,18 +42,18 @@ class ProximitySensor:
 	def setHighThreshold(self,t):	
 		highBits = (0xFF00 & t) >> 8
 		lowBits  = (0x00FF & t)
-		write(self.bus,0x8C,2)	# Enable interrupt 
-		write(self.bus,0x8D,2)	# Enable interrupt 
+		write(self.bus,0x8C,highBits)	# Enable interrupt 
+		write(self.bus,0x8D,lowBits)	# Enable interrupt 
 
-	def getLowThreshold(self,t):
+	def getLowThreshold(self):
 		highBits = read(self.bus,0x8A)	
 		lowBits  = read(self.bus,0x8B)
-		return highBits << 8 | lowBits	 
+		return (highBits << 8) | lowBits	 
 
-	def getHighThreshold(self,t):
+	def getHighThreshold(self):
 		highBits = read(self.bus,0x8C)	
 		lowBits  = read(self.bus,0x8D)
-		return highBits << 8 | lowBits	
+		return (highBits << 8) | lowBits	
 
 
 
