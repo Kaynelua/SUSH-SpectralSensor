@@ -7,6 +7,7 @@ import Servo as servo
 
 s = ss.SpectralSensor()
 p = ps.ProximitySensor()
+p.proxInterrupt(1)
 p.setHighThreshold(15000)
 
 def sensorEvent(pin):
