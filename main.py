@@ -36,6 +36,7 @@ count = 0
 while(True):
 	try:
 		count = count + 1
+		time.sleep(0.1)
 		print("Doing Other Stuff " + str(count))
 	except:
 		GPIO.cleanup()

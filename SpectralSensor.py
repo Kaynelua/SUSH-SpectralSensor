@@ -8,18 +8,21 @@ import bitstring as bs
 class SpectralSensor:
 	def __init__(self):
 		self.bus = smbus.SMBus(1)
+		self.gain(2)
 
 	def gain(self,level):
 		if(level >=0 and level <=3):
 			reg = read(self.bus,0x07)
 			reg = reg & 0xCF
 			write(self.bus,0x07,reg|level<<4)
+
 	def ledInd(self,state:bool):
 		reg = read(self.bus,0x07)
 		if(state):
 			write(self.bus,0x07,reg | 0x01)
 		else:
 			write(self.bus,0x07,reg & 0xFE)
+
 	def ledDrv(self,level):
 		reg = read(self.bus,0x07)
 		if(level == 1):
@@ -35,7 +38,7 @@ class SpectralSensor:
 
 	def setBank(self,bank:int):
 		reg = read(self.bus,0x04)
-		reg = reg & 0xF3
+		reg = reg & 0xF1
 		write(self.bus,0x04, reg|bank<<2)
 
 	def dataReady(self):
@@ -64,7 +67,7 @@ class SpectralSensor:
 (0x1C,0x1D,0x1E,0x1F),(0x20,0x21,0x22,0x23),(0x24,0x25,0x26,0x27),(0x28,0x29,0x2A,0x2B)]
 		calSpectrum=[]
 		while(not self.dataReady()):
-			time.sleep(0.001)
+			time.sleep(0.01)
 		for color in colors_add :
 			b3 = read(self.bus,color[0])
 			b2 = read(self.bus,color[1])
