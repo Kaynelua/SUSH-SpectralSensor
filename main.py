@@ -8,7 +8,7 @@ import Servo as servo
 s = ss.SpectralSensor()
 p = ps.ProximitySensor()
 
-p.setHighThreshold(15000)
+p.setHighThreshold(10000)
 p.setInterrupt(1)
 
 
