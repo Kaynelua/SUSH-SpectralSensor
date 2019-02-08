@@ -89,9 +89,9 @@ while(True):
 		#	pd.train("Pink")
 		pd.evalColour(pd.getResult()) 		
 
-		print pd.refValues
+		print(pd.refValues)
 	except Exception as e:
-    	print("Error : " + str(e))
+		print("Error : " + str(e))
 		GPIO.cleanup()
 
 
