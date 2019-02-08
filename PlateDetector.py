@@ -95,18 +95,18 @@ count = 0
 pd = PlateDetector()
 while(True):
 	try:
-		for i in range(0,5,1):
+		for i in range(0,2,1):
 			pd.train("Orange")
-		for i in range(0,5,1):
+		for i in range(0,2,1):
 			pd.train("Blue")
-		for i in range(0,5,1):
+		for i in range(0,2,1):
 			pd.train("White")
-		for i in range(0,5,1):
+		for i in range(0,2,1):
 			pd.train("Pink")
 
 		pd.store()
 
-		pd.evalColour(pd.getResult()) 		
+		print(pd.evalColour(pd.getResult())) 		
 
 		print(pd.refValues)
 	except Exception as e:
