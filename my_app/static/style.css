@@ -1,0 +1,8 @@
+body {
+  padding-top: 200px;
+}
+.index-header {
+  padding: 40px 15px; /* 40px top, 15px bottom(?)*/
+  text-align: center;
+}
+
