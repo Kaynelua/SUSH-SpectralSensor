@@ -6,6 +6,7 @@ from threading import Thread
 import queue
 import Servo as servo
 import numpy as np
+import pickle
 
 GPIO.setmode(GPIO.BCM)
 
@@ -22,8 +23,9 @@ class PlateDetector():
 		GPIO.setup(self.interruptPin,GPIO.IN,pull_up_down=GPIO.PUD_UP)
 		GPIO.add_event_detect(self.interruptPin,GPIO.FALLING,callback=self.sensorEvent)
 		self.p.setInterrupt(1)
-
-		self.refValues = {}
+		#Loading dict from pickle file if it exists, else init new dict
+    	
+		self.refValues = self.load()
 
 	def autoScanning(self):
 		pass
@@ -73,6 +75,20 @@ class PlateDetector():
 				minColour = c
 		return minColour
 
+	def store(self):
+		try:
+			pickle.dump(self.refValues, open("data.pickle", "wb"))
+		except Exception as e:
+			print("Error :" + str(e))
+
+	def load(self):
+		try:
+			colourdict= pickle.load(open("data.pickle", "rb"))
+			return colourdict
+		except Exception as e:
+			colourdict =  {} 
+			return colourdict
+
 
 
 count = 0
@@ -83,10 +99,13 @@ while(True):
 			pd.train("Orange")
 		for i in range(0,5,1):
 			pd.train("Blue")
-		#for i in range(0,5,1):
-		#	pd.train("White")
-		#for i in range(0,5,1):
-		#	pd.train("Pink")
+		for i in range(0,5,1):
+			pd.train("White")
+		for i in range(0,5,1):
+			pd.train("Pink")
+
+		pd.store()
+
 		pd.evalColour(pd.getResult()) 		
 
 		print(pd.refValues)
