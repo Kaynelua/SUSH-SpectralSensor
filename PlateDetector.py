@@ -6,10 +6,12 @@ from threading import Thread
 import queue
 import Servo as servo
 
+GPIO.setmode(GPIO.BCM)
+
 class PlateDetector():
 
 	def __init__(self,mode='Train'):
-		GPIO.setmode(GPIO.BCM)
+
 		self.s = ss.SpectralSensor()
 		self.p = ps.ProximitySensor()
 		self.interruptPin = 17
@@ -59,9 +61,6 @@ class PlateDetector():
 	def getResult(self):
 		return self.resultQueue.get(block=True)
 
-	def 
-
-
 
 count = 0
 pd = PlateDetector()
@@ -71,7 +70,8 @@ while(True):
 		#time.sleep(8)
 		pd.train("Orange")
 		print pd.refValues()
-	except:
+	except Exception, e:
+    	print("Error : " + str(e))
 		GPIO.cleanup()
 
 
