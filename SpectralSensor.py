@@ -77,4 +77,4 @@ class SpectralSensor:
 			bin_val = np.binary_repr(val,width = 32)
 			c = bs.BitArray(bin=bin_val)
 			calSpectrum.append(c.float)
-		return calSpectrum
+		return np.array(calSpectrum)

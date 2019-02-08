@@ -5,6 +5,7 @@ import ProximitySensor as ps
 from threading import Thread
 import queue
 import Servo as servo
+import numpy as np
 
 GPIO.setmode(GPIO.BCM)
 
@@ -61,16 +62,35 @@ class PlateDetector():
 	def getResult(self):
 		return self.resultQueue.get(block=True)
 
+	def evalColour(self,val):
+		minError  = np.inf
+		minColour = None
+		for c in self.refValues.keys():
+			(ref,n) = self.refValues[c]
+			error = np.mean(((val-ref)**2))
+			if(error < minError):
+				minError = error
+				minColour = c
+		return minColour
+
+
 
 count = 0
 pd = PlateDetector()
 while(True):
 	try:
-		#print(pd.getResult())
-		#time.sleep(8)
-		pd.train("Orange")
-		print pd.refValues()
-	except Exception, e:
+		for i in range(0,5,1):
+			pd.train("Orange")
+		for i in range(0,5,1):
+			pd.train("Blue")
+		#for i in range(0,5,1):
+		#	pd.train("White")
+		#for i in range(0,5,1):
+		#	pd.train("Pink")
+		pd.evalColour(pd.getResult()) 		
+
+		print pd.refValues
+	except Exception as e:
     	print("Error : " + str(e))
 		GPIO.cleanup()
 
