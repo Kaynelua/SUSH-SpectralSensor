@@ -67,12 +67,27 @@ class ModeControl extends React.Component {
     this.handleChange2 = this.handleChange2.bind(this);
     this.handleSubmit2 = this.handleSubmit2.bind(this);
     this.updatemsgReceived = this.updatemsgReceived.bind(this);
-    this.state = {inUserMode: false , items :[], inputCost1: '',inputCost2: '', totalNumPlates : 3 ,msgReceived : 0, colors:[]};
+    this.state = {inUserMode: false , items :[], inputCost1: '',inputCost2: '', totalNumPlates : 3 ,msgReceived : 0, colors:[],
+                  orderTally: {} , plate_count: 0};
   }
 
   //Called via callback from messageArrived
   updatemsgReceived(message){
     if(this.state.inUserMode){
+      var rcv_color = message.payloadString;
+      console.log("Message : "+rcv_color + "    usr_message count:" +this.state.plate_count);
+
+      if( !(this.state.orderTally.hasOwnProperty("rcv_color")) ){
+        console.log("First plate");
+        this.setState({orderTally : {rcv_color: 1} } );
+      }
+      else{
+        this.setState(state=> ({orderTally : {rcv_color: state.orderTally.rcv_color + 1} }));
+
+      }
+
+      console.log("currentTally:"  + this.state.orderTally.rcv_color);
+      this.state.plate_count = this.state.plate_count+1;  
 
     }
     else{
@@ -152,7 +167,6 @@ class ModeControl extends React.Component {
 
     if (inUserMode) {
       //IN USER MODE:
-      var plate_count =0;
 
       //this.state.items.length = 0	//Clear our list when in user mode
 
