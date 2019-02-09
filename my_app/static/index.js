@@ -2,7 +2,8 @@
 var {Component} = React;
 
 
-let messageCount =2;
+var messageCount =0;
+
 
 function Greeting(props) {
   const inUserMode = props.inUserMode;
@@ -27,22 +28,31 @@ function GoToAdminButton(props) {
     </button>
   );
 }
-
-function loadMyAsyncData(){
-  var a= new Promise(function(resolve, reject) {
-    resolve(messageCount)
-  });
-  return a;
-} 
+function combinePriceColour(props){
+  return(
+      props.items.map( (item,index) =>
+        ({color:props.colors[index].text,price:item.text})
+        )
+  );
+}
 
 class PriceList extends React.Component {
+
+
+
   render() {
+   const combined = combinePriceColour(this.props)
     return (
-      <ul>
-        {this.props.items.map(item => (
-          <li key={item.id}>{item.text}</li>
-        ))}
-      </ul>
+      <div>
+        <ul>
+              {combined.map(pair  =>
+                <li key={pair.color}>
+                <span> {pair.color} </span> 
+                <span> {pair.price} </span> 
+                </li>
+                )} 
+        </ul>
+      </div>
     );
   }
 }
@@ -56,21 +66,27 @@ class ModeControl extends React.Component {
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleChange2 = this.handleChange2.bind(this);
     this.handleSubmit2 = this.handleSubmit2.bind(this);
-    this.state = {inUserMode: false , items :[], inputCost1: '',inputCost2: '', totalNumPlates : 3 ,msgReceived : null};
+    this.updatemsgReceived = this.updatemsgReceived.bind(this);
+    this.state = {inUserMode: false , items :[], inputCost1: '',inputCost2: '', totalNumPlates : 3 ,msgReceived : 0, colors:[]};
   }
 
-  componentDidMount() {
-    this._asyncRequest = loadMyAsyncData().then(
-      msgReceived => {
-        this._asyncRequest = null;
-        this.setState({msgReceived});
-      }
-    );
-  }
+  //Called via callback from messageArrived
+  updatemsgReceived(message){
+    if(this.state.inUserMode){
 
-  componentWillUnmount() {
-    if (this._asyncRequest) {
-      this._asyncRequest.cancel();
+    }
+    else{
+      messageCount = messageCount +1;
+      console.log("Message : "+message.payloadString + "    message count:" +messageCount);
+      console.log(typeof message.payloadString)
+      const newColor ={
+        id : messageCount,
+        text :message.payloadString
+      };
+      this.setState(state=> ({
+        colors : state.colors.concat(newColor)
+      }));
+      this.setState({msgReceived : messageCount});
     }
   }
 
@@ -135,7 +151,11 @@ class ModeControl extends React.Component {
     let collate;
 
     if (inUserMode) {
-      this.state.items.length = 0	//Clear our list when in user mode
+      //IN USER MODE:
+      var plate_count =0;
+
+      //this.state.items.length = 0	//Clear our list when in user mode
+
       button = <GoToAdminButton onClick={this.handleLogoutClick} />;
 
 
@@ -177,7 +197,7 @@ class ModeControl extends React.Component {
 
 
     	button = <GoToUserButton onClick={this.handleLoginClick} />;
-    	collate = <PriceList items={this.state.items} />
+    	collate = <PriceList items={this.state.items} colors ={this.state.colors}/>
 
     }
 
@@ -197,11 +217,43 @@ class ModeControl extends React.Component {
   }
 }
 
+var element = <ModeControl />
 
-ReactDOM.render(
-	<ModeControl />,
+
+const webPage = ReactDOM.render(element,
 	document.getElementById('root')
 );
+
+var host = "test.mosquitto.org";
+var port = 8081
+var topic = "IC.Embedded/IOS/#"
+
+// Client Instance
+var client = new Paho.MQTT.Client(host,port,"Main")
+client.onMessageArrived = webPage.updatemsgReceived;//onMessageArrived;//window.element.updatemsgReceived;
+client.onConnectionLost = onConnectionLost;
+
+// Callback handler
+client.connect({onSuccess:onConnect,
+        useSSL   :true
+         })
+
+function onConnect() {
+  console.log("Connection Succesful");
+  client.subscribe(topic)
+  //let message = new Paho.MQTT.Message("Hello");
+  //message.destinationName = topic;
+  //client.send(message);
+}
+
+function onConnectionLost(responseObject) {
+  if (responseObject.errorCode !== 0) {
+    console.log("onConnectionLost:"+responseObject.errorMessage);
+  }
+}
+
+
+
 
 
 // If you want your app to work offline and load faster, you can change
