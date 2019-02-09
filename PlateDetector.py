@@ -2,6 +2,7 @@ import time
 import RPi.GPIO as GPIO
 import SpectralSensor as ss
 import ProximitySensor as ps
+import Mqtt as mq
 from threading import Thread
 import queue
 import Servo as servo
@@ -13,22 +14,23 @@ GPIO.setmode(GPIO.BCM)
 class PlateDetector():
 
 	def __init__(self,mode='Train'):
-
+		self.mode = 'Train'
+		self.resultQueue = queue.Queue()
+		self.refValues = self.loadReference()
 		self.s = ss.SpectralSensor()
 		self.p = ps.ProximitySensor()
 		self.interruptPin = 17
-		self.mode = 'Train'
-		self.resultQueue = queue.Queue()
 		self.p.setHighThreshold(10000)
 		GPIO.setup(self.interruptPin,GPIO.IN,pull_up_down=GPIO.PUD_UP)
 		GPIO.add_event_detect(self.interruptPin,GPIO.FALLING,callback=self.sensorEvent)
 		self.p.setInterrupt(1)
-		#Loading dict from pickle file if it exists, else init new dict
-    	
-		self.refValues = self.load()
+		self.client = mq.Mqtt()
 
 	def autoScanning(self):
-		pass
+		res = self.getResult()
+		colour = self.evalColour(res)
+		self.client.send("IC.Embedded/IOS/detection",colour)
+
 
 	def train(self,c):
 		val = pd.getResult()
@@ -39,9 +41,6 @@ class PlateDetector():
 			newVal = q + (1/(n+1))*(val-q)
 			self.refValues[c] = (newVal,n+1)
 
-
-
-
 	def sensorEvent(self,pin):
 		# Read Sensor and Store in Queue
 		self.s.ledDrv(1)
@@ -49,12 +48,10 @@ class PlateDetector():
 		r = self.s.readAllCal()
 		self.resultQueue.put_nowait(r)
 		self.s.ledDrv(0)
-		
 		# Open and Close to release plate
 		servo.open()
 		time.sleep(0.1)
 		servo.close()
-
 		# Reset Interrupt on Proximity Sensor
 		GPIO.remove_event_detect(self.interruptPin)
 		self.p.setInterrupt(0)
@@ -81,7 +78,7 @@ class PlateDetector():
 		except Exception as e:
 			print("Error :" + str(e))
 
-	def load(self):
+	def loadReference(self):
 		try:
 			colourdict= pickle.load(open("data.pickle", "rb"))
 			return colourdict
@@ -103,11 +100,8 @@ while(True):
 			pd.train("White")
 		for i in range(0,2,1):
 			pd.train("Pink")
-
 		pd.store()
-
 		print(pd.evalColour(pd.getResult())) 		
-
 		print(pd.refValues)
 	except Exception as e:
 		print("Error : " + str(e))
