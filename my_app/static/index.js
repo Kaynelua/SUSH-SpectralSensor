@@ -5,7 +5,7 @@ var {Component} = React;
 var messageCount =0;
 
 
-function Greeting(props) {
+function Heading(props) {
   const inUserMode = props.inUserMode;
   if (inUserMode) {
     return <h1>User Mode</h1>;
@@ -47,9 +47,6 @@ function combinePriceColour(props){
 }
 
 class PriceList extends React.Component {
-
-
-
   render() {
    const combined = combinePriceColour(this.props)
     return (
@@ -73,110 +70,58 @@ class ModeControl extends React.Component {
     this.handleCollateClick = this.handleCollateClick.bind(this);
     this.handleLoginClick = this.handleLoginClick.bind(this);
     this.handleLogoutClick = this.handleLogoutClick.bind(this);
-    this.handleChange = this.handleChange.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
-    this.handleChange2 = this.handleChange2.bind(this);
-    this.handleSubmit2 = this.handleSubmit2.bind(this);
     this.updatemsgReceived = this.updatemsgReceived.bind(this);
+    this.handlePriceTextChange = this.handlePriceTextChange.bind(this);  
     this.state = {inUserMode: false ,
                   items :[], 
                   inputCost1: '',
                   inputCost2: '',
                   totalNumPlates : 3,
                   msgReceived : 0,
-                  colors:[],
+                  colors:[{key:'blue',price:""},{key:'red',price:""},{key:'white',price:""},{key:'orange',price:""},{key:'pink',price:""}],
                   orderTally: []};
   }
 
-  //Called via callback from messageArrived
   updatemsgReceived(message){
     if(this.state.inUserMode){
       let plateColor = message.payloadString;
       let mapIdx =  this.state.orderTally.findIndex(x => x.key==plateColor)
       if(mapIdx == -1){
-        this.setState(state => ({
-          orderTally : state.orderTally.concat( ({key:plateColor,count:1}) )
-        }));
-        console.log("First plate");
+        this.setState(state => ({ orderTally : state.orderTally.concat( ({key:plateColor,count:1}) )}));
       }
       else{
         let orderTally  = this.state.orderTally
         let plateRecord = orderTally[mapIdx]
         plateRecord.count = plateRecord.count + 1
         orderTally[mapIdx] = plateRecord
-        this.setState(state=>({
-          orderTally : orderTally
-        }));
+        this.setState(state=>({ orderTally : orderTally }));
       }
       console.log("Message : " + plateColor);
       console.log(this.state.orderTally);
     }
-
-    else{
-      messageCount = messageCount +1;
-      console.log("Message : "+message.payloadString + "    message count:" +messageCount);
-      console.log(typeof message.payloadString)
-      const newColor ={
-        id : messageCount,
-        text :message.payloadString
-      };
-      this.setState(state=> ({
-        colors : state.colors.concat(newColor)
-      }));
-      this.setState({msgReceived : messageCount});
-    }
   }
 
-  handleLoginClick() {
-  	//Switch to user Mode
+  handleLoginClick(e) {
     this.setState({inUserMode: true});
   }
 
-  handleLogoutClick() {
-  	//Switch to Admin Mode
+  handleLogoutClick(e) {
     this.setState({inUserMode: false});
   }
 
-  handleChange(e) {
-    this.setState({ inputCost1: e.target.value });
-  }
-
-  handleSubmit(e) {
-    e.preventDefault();
-    if (!this.state.inputCost1.length) {
-      return;
-    }
-    const newItem = {
-      text: this.state.inputCost1,
-      id: Date.now()
-    };
-    this.setState(state => ({
-      items: state.items.concat(newItem),
-      inputCost1 :''
-    }));
-  }
-
-  handleChange2(e) {
-    this.setState({ inputCost2: e.target.value });
-  }
-
-  handleSubmit2(e) {
-    e.preventDefault();
-    if (!this.state.inputCost2.length) {
-      return;
-    }
-    const newItem = {
-      text: this.state.inputCost2,
-      id: Date.now()
-    };
-    this.setState(state => ({
-      items: state.items.concat(newItem),
-      inputCost2 :''
-    }));
-  }
   handleCollateClick(e){
     let totalCost = this.state.orderTally.reduce( (a,b)=> a.count + b.count );
     console.log(totalCost);
+  }
+
+  handlePriceTextChange(newColorObj){
+    let colors = this.state.colors
+    let idx = this.state.colors.findIndex(x => x.key==newColorObj.key)
+    colors[idx] = newColorObj
+    this.setState({
+      colors: colors
+    });
+    console.log(this.state.colors);
   }
 
   render() {
@@ -185,71 +130,40 @@ class ModeControl extends React.Component {
     let modeButton;
     let collateButton;
     let collateList;
-
-
-    let plate_setup_1= ""
-    let detected_1= ""
-    let plate_setup_2= ""
-    let detected_2= ""
-    let plate_setup_3= ""
-    let detected_3= ""
-   
-
-    if (inUserMode) {  
-      modeButton = <GoToAdminButton onClick={this.handleLogoutClick} />;
+    let adminInput;
+    const rows = [];
+    const orderLine = [];
+    if(inUserMode){  
+      modeButton    = <GoToAdminButton onClick={this.handleLogoutClick} />;
       collateButton = <CollateOrderButton onClick={this.handleCollateClick} />;
+      this.state.orderTally.forEach( (orderTally) => {
+          let colorObj   = this.state.colors.find(x=>x.key==orderTally.key)
+          orderLine.push(
+            <OrderLine
+              key      = {orderTally.key}
+              order    = {orderTally}
+              colorObj = {colorObj  }
+            />
+      )});
+
     } 
-    else {
-      //IN ADMIN MODE DO CALIBRATION
-      	plate_setup_1= "Plate 1: " 
-      	if(msgReceived >= 1) {
-    		detected_1 = 
-    		<form onSubmit={this.handleSubmit}>
-			<label htmlFor="p1">
-            	Detected! Price : $
-          	</label> 
-    		<input
-            id="p1"
-            onChange={this.handleChange}
-            value={this.state.inputCost1}
-            />
-           	</form>
-    	} 
-    	plate_setup_2= "Plate 2: "
-      	if(msgReceived >= 2) {
-    		detected_2= 
-    		<form onSubmit={this.handleSubmit2}>
-			<label htmlFor="p2">
-            	Detected! Price : $
-          	</label> 
-    		<input
-            id="p2"
-            onChange={this.handleChange2}
-            value={this.state.inputCost2}
-            />
-           	</form>
-    	}
-
-    	plate_setup_3 = "Plate 3: "
-      	if(msgReceived >= 3) {
-    		detected_3= "Detected" 
-    	}
-
-
+    else{
     	modeButton = <GoToUserButton onClick={this.handleLoginClick} />;
     	collateList = <PriceList items={this.state.items} colors ={this.state.colors}/>
-
+      this.state.colors.forEach( (colorObj) => {
+          rows.push(
+            <ColorRow
+              key      ={colorObj.key}
+              colorObj ={colorObj    }
+              onPriceTextChange={this.handlePriceTextChange}
+            />
+      )});
     }
-
     return (
       <div>
-        <Greeting inUserMode={inUserMode} />
-        {plate_setup_1}
-        {detected_1} <br /> <br />
-        {plate_setup_2}
-        {detected_2} <br /> <br />
-        {plate_setup_3}
-        {detected_3} <br /> <br />
+        <Heading inUserMode={inUserMode} />
+        {orderLine}
+        {rows}
         {collateList}
         {modeButton}
         {collateButton}
@@ -258,16 +172,63 @@ class ModeControl extends React.Component {
   }
 }
 
+class ColorRow extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {value: this.props.colorObj.price};
+    this.handlePriceTextChange = this.handlePriceTextChange.bind(this);
+  }
+  handlePriceTextChange(event) {
+    let newPrice = event.target.value
+    this.setState({value: newPrice});
+    this.props.colorObj.price = newPrice
+    this.props.onPriceTextChange(this.props.colorObj);
+  }
+  render() {
+    const name = this.props.colorObj.key;
+    const id   = name + "_form" ;
+    return (
+      <div>
+        <form>
+          <label htmlFor={id}> {name}  £ </label> 
+          <input id={id} value={this.state.value} onChange={this.handlePriceTextChange} /> 
+        </form>
+      </div>
+    );
+  }
+}
+
+class OrderLine extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+
+  render() {
+    const name  = this.props.order.key;
+    const id    = "orderline_"+name;
+    const count = this.props.order.count 
+    console.log( parseFloat(count))
+    console.log(parseFloat(this.props.colorObj.price))
+    const totalAmount = parseFloat(count) * parseFloat(this.props.colorObj.price)
+    return (
+      <div>
+        <span> {name} x</span>
+        <span> {count}</span>
+        <span> {totalAmount}</span>
+      </div>
+    );
+  }
+}
+
+
 var element = <ModeControl />
-
-
 const webPage = ReactDOM.render(element,
 	document.getElementById('root')
 );
 
 var host = "test.mosquitto.org";
-var port = 8081
 var topic = "IC.Embedded/IOS/#"
+var port = 8081
 
 // Client Instance
 var client = new Paho.MQTT.Client(host,port,"Main")
@@ -282,9 +243,6 @@ client.connect({onSuccess:onConnect,
 function onConnect() {
   console.log("Connection Succesful");
   client.subscribe(topic)
-  //let message = new Paho.MQTT.Message("Hello");
-  //message.destinationName = topic;
-  //client.send(message);
 }
 
 function onConnectionLost(responseObject) {
@@ -292,12 +250,3 @@ function onConnectionLost(responseObject) {
     console.log("onConnectionLost:"+responseObject.errorMessage);
   }
 }
-
-
-
-
-
-// If you want your app to work offline and load faster, you can change
-// unregister() to register() below. Note this comes with some pitfalls.
-// Learn more about service workers: http://bit.ly/CRA-PWA
-//serviceWorker.register();
