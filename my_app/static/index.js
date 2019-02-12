@@ -28,6 +28,16 @@ function GoToAdminButton(props) {
     </button>
   );
 }
+
+function CollateOrderButton(props){
+  return (
+    <button onClick={props.onClick}>
+      Collate Order
+    </button>
+  );
+}
+
+
 function combinePriceColour(props){
   return(
       props.items.map( (item,index) =>
@@ -60,6 +70,7 @@ class PriceList extends React.Component {
 class ModeControl extends React.Component {
   constructor(props) {
     super(props);
+    this.handleCollateClick = this.handleCollateClick.bind(this);
     this.handleLoginClick = this.handleLoginClick.bind(this);
     this.handleLogoutClick = this.handleLogoutClick.bind(this);
     this.handleChange = this.handleChange.bind(this);
@@ -67,29 +78,40 @@ class ModeControl extends React.Component {
     this.handleChange2 = this.handleChange2.bind(this);
     this.handleSubmit2 = this.handleSubmit2.bind(this);
     this.updatemsgReceived = this.updatemsgReceived.bind(this);
-    this.state = {inUserMode: false , items :[], inputCost1: '',inputCost2: '', totalNumPlates : 3 ,msgReceived : 0, colors:[],
-                  orderTally: {} , plate_count: 0};
+    this.state = {inUserMode: false ,
+                  items :[], 
+                  inputCost1: '',
+                  inputCost2: '',
+                  totalNumPlates : 3,
+                  msgReceived : 0,
+                  colors:[],
+                  orderTally: []};
   }
 
   //Called via callback from messageArrived
   updatemsgReceived(message){
     if(this.state.inUserMode){
-      var rcv_color = message.payloadString;
-      console.log("Message : "+rcv_color + "    usr_message count:" +this.state.plate_count);
-
-      if( !(this.state.orderTally.hasOwnProperty("rcv_color")) ){
+      let plateColor = message.payloadString;
+      let mapIdx =  this.state.orderTally.findIndex(x => x.key==plateColor)
+      if(mapIdx == -1){
+        this.setState(state => ({
+          orderTally : state.orderTally.concat( ({key:plateColor,count:1}) )
+        }));
         console.log("First plate");
-        this.setState({orderTally : {rcv_color: 1} } );
       }
       else{
-        this.setState(state=> ({orderTally : {rcv_color: state.orderTally.rcv_color + 1} }));
-
+        let orderTally  = this.state.orderTally
+        let plateRecord = orderTally[mapIdx]
+        plateRecord.count = plateRecord.count + 1
+        orderTally[mapIdx] = plateRecord
+        this.setState(state=>({
+          orderTally : orderTally
+        }));
       }
-
-      console.log("currentTally:"  + this.state.orderTally.rcv_color);
-      this.state.plate_count = this.state.plate_count+1;  
-
+      console.log("Message : " + plateColor);
+      console.log(this.state.orderTally);
     }
+
     else{
       messageCount = messageCount +1;
       console.log("Message : "+message.payloadString + "    message count:" +messageCount);
@@ -152,28 +174,32 @@ class ModeControl extends React.Component {
       inputCost2 :''
     }));
   }
+  handleCollateClick(e){
+    let totalCost = this.state.orderTally.reduce( (a,b)=> a.count + b.count );
+    console.log(totalCost);
+  }
 
   render() {
     const inUserMode = this.state.inUserMode;
     const msgReceived = this.state.msgReceived;
-    let button;
+    let modeButton;
+    let collateButton;
+    let collateList;
+
+
     let plate_setup_1= ""
     let detected_1= ""
     let plate_setup_2= ""
     let detected_2= ""
     let plate_setup_3= ""
     let detected_3= ""
-    let collate;
+   
 
-    if (inUserMode) {
-      //IN USER MODE:
-
-      //this.state.items.length = 0	//Clear our list when in user mode
-
-      button = <GoToAdminButton onClick={this.handleLogoutClick} />;
-
-
-    } else {
+    if (inUserMode) {  
+      modeButton = <GoToAdminButton onClick={this.handleLogoutClick} />;
+      collateButton = <CollateOrderButton onClick={this.handleCollateClick} />;
+    } 
+    else {
       //IN ADMIN MODE DO CALIBRATION
       	plate_setup_1= "Plate 1: " 
       	if(msgReceived >= 1) {
@@ -210,8 +236,8 @@ class ModeControl extends React.Component {
     	}
 
 
-    	button = <GoToUserButton onClick={this.handleLoginClick} />;
-    	collate = <PriceList items={this.state.items} colors ={this.state.colors}/>
+    	modeButton = <GoToUserButton onClick={this.handleLoginClick} />;
+    	collateList = <PriceList items={this.state.items} colors ={this.state.colors}/>
 
     }
 
@@ -224,8 +250,9 @@ class ModeControl extends React.Component {
         {detected_2} <br /> <br />
         {plate_setup_3}
         {detected_3} <br /> <br />
-        {collate}
-        {button}
+        {collateList}
+        {modeButton}
+        {collateButton}
       </div>
     );
   }
