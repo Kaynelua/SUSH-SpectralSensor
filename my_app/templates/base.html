@@ -8,8 +8,6 @@
 
 
 		<!-- Javascript -->
-		<script src = "static/jquery-1.11.3.js"></script>
-		<script src = "static/bootstrap/js/bootstrap.js"></script>
 		<script src = "https://unpkg.com/react@16/umd/react.development.js"></script>
 	    <script src = "https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
 	    <script src = "https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
@@ -17,7 +15,9 @@
 	    
 
 		<!-- Bootstrap CSS -->
-		<link href = "static/bootstrap/css/bootstrap.min.css" rel = "stylesheet">
+		<!-- <link href = "static/bootstrap/css/bootstrap.min.css" rel = "stylesheet"> -->
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.0/css/bootstrap.min.css" integrity="sha384-PDle/QlgIONtM1aqA2Qemk5gPOE7wFq8+Em+G/hmo5Iq0CCmYZLv3fVRDJ4MMwEA" crossorigin="anonymous">
+
 		<!-- Custom Styles -->
 		<link href = "static/style.css" rel = "stylesheet">
 
@@ -27,35 +27,18 @@
        		<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     	<![endif]-->
 	</head>
-	<body>	
-		 <nav class="navbar navbar-inverse navbar-fixed-top">
-	      <div class="container">
-	        <div class="navbar-header">
-	          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-	            <span class="sr-only">Toggle navigation</span>
-	            <span class="icon-bar"></span>
-	            <span class="icon-bar"></span>
-	            <span class="icon-bar"></span>
-	          </button>
-	          <a class="navbar-brand" href="{{ url_for('index')}}">Patrick John</a>
-	        </div>
-	        <div id="navbar" class="collapse navbar-collapse">
-	          <ul class="nav navbar-nav">
-	            <li {% if page == 'home' %} class="active" {%endif%} ><a href="{{ url_for('index')}}">Home</a></li>
-	            <li {% if page == 'about' %} class="active" {%endif%} ><a href="{{ url_for('about')}}">About</a></li>
-	            <li {% if page == 'blog' %} class="active" {%endif%} ><a href="{{ url_for('blog')}}">Blog</a></li>
-	            <li {% if page == 'photography' %} class="active" {%endif%} ><a href="{{ url_for('photography')}}">Photography</a></li>
-	            <li {% if page == 'contact' %} class="active" {%endif%} ><a href="{{ url_for('contact')}}">Contact</a></li>
-	          </ul>
-	        </div><!--/.nav-collapse -->
-	      </div>
-	    </nav>
+	<body>
 
-	    {% block index %}{% endblock %}
-	    {% block about %}{% endblock %}
-	    {% block blog %}{% endblock %}
-	    {% block photography %}{% endblock %}
-	    {% block contact %}{% endblock %}
+		
+    		{% block index %}{% endblock %}
+
+
+
 	    
+	    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+		<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.0/js/bootstrap.min.js" integrity="sha384-7aThvCh9TypR7fIc2HV4O/nFMVCBwyIUKL8XCtKE+8xgCgl/PQGuFsvShjr74PBp" crossorigin="anonymous"></script>
+
+
 	</body>
 </html>

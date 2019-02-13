@@ -6,11 +6,13 @@ var messageCount =0;
 
 
 function Heading(props) {
-  const inUserMode = props.inUserMode;
-  if (inUserMode) {
-    return <h1>User Mode</h1>;
-  }
-  return <h1>Admin Mode</h1>;
+  const modeName = props.modeName;
+  return (
+   <h4 class="d-flex justify-content-between align-items-center mb-3">
+        <span class="text-muted">{modeName}</span>
+        <span class="badge badge-secondary badge-pill">3</span>
+  </h4>
+  );
 }
 
 function GoToUserButton(props) {
@@ -131,11 +133,17 @@ class ModeControl extends React.Component {
     let collateButton;
     let collateList;
     let adminInput;
+    let heading;
     const rows = [];
     const orderLine = [];
+
+    let uMode = [];
+    let aMode = [];
+
     if(inUserMode){  
-      modeButton    = <GoToAdminButton onClick={this.handleLogoutClick} />;
-      collateButton = <CollateOrderButton onClick={this.handleCollateClick} />;
+      heading       = <Heading modeName='Bill' />;
+      modeButton    = <GoToAdminButton key="abutton" onClick={this.handleLogoutClick} />;
+      collateButton = <CollateOrderButton key="lol" onClick={this.handleCollateClick} />;
       this.state.orderTally.forEach( (orderTally) => {
           let colorObj   = this.state.colors.find(x=>x.key==orderTally.key)
           orderLine.push(
@@ -146,9 +154,14 @@ class ModeControl extends React.Component {
             />
       )});
 
+      uMode.push(heading)
+      uMode.push(orderLine)
+      uMode.push(modeButton)
+      uMode.push(collateButton)
     } 
     else{
-    	modeButton = <GoToUserButton onClick={this.handleLoginClick} />;
+      heading       = <Heading modeName='Calibration' />;
+    	modeButton = <GoToUserButton key="ubutton" onClick={this.handleLoginClick} />;
     	collateList = <PriceList items={this.state.items} colors ={this.state.colors}/>
       this.state.colors.forEach( (colorObj) => {
           rows.push(
@@ -158,19 +171,31 @@ class ModeControl extends React.Component {
               onPriceTextChange={this.handlePriceTextChange}
             />
       )});
+      aMode.push(heading)
+      aMode.push(rows)
+      aMode.push(modeButton)
     }
     return (
-      <div>
-        <Heading inUserMode={inUserMode} />
-        {orderLine}
-        {rows}
-        {collateList}
-        {modeButton}
-        {collateButton}
+      <div class="row">
+        <div class="col-md-4 order-md-2 mb-4"></div> 
+        <div class="col-md-4 order-md-2 mb-4"> 
+              <ul class="list-group mb-3">
+                {aMode}
+                {uMode}
+              </ul>
+        </div>
+        <div class="col-md-4 order-md-2 mb-4"></div>
       </div>
     );
   }
 }
+
+/*
+{orderLine}
+        {rows}
+        {collateList}
+        {modeButton}
+        {collateButton}*/
 
 class ColorRow extends React.Component {
   constructor(props) {
@@ -188,15 +213,43 @@ class ColorRow extends React.Component {
     const name = this.props.colorObj.key;
     const id   = name + "_form" ;
     return (
-      <div>
-        <form>
-          <label htmlFor={id}> {name}  £ </label> 
-          <input id={id} value={this.state.value} onChange={this.handlePriceTextChange} /> 
-        </form>
-      </div>
+
+
+
+
+
+      <li class="list-group-item d-flex justify-content-between lh-condensed">
+        <div>
+          <form class="form-inline">
+            <div class="form-group mx-sm-3 mb-2">
+              <h6 class="my-0">
+                <label for={id}>{name}</label> 
+              </h6>  
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">£</span>
+                  </div> 
+                  <small class="text-muted">
+                    <input id={id}  class="form-control" value={this.state.value} onChange={this.handlePriceTextChange} /> 
+                  </small>
+                </div>
+            </div>
+          </form>    
+        </div>
+      </li>
     );
   }
 }
+
+/*
+
+  <div class="form-group mx-sm-3 mb-2">
+    <label for="inputPassword2" class="sr-only">Password</label>
+    <input type="password" class="form-control" id="inputPassword2" placeholder="Password">
+  </div>
+
+  */
+
 
 class OrderLine extends React.Component {
   constructor(props) {
@@ -211,11 +264,13 @@ class OrderLine extends React.Component {
     console.log(parseFloat(this.props.colorObj.price))
     const totalAmount = parseFloat(count) * parseFloat(this.props.colorObj.price)
     return (
-      <div>
-        <span> {name} x</span>
-        <span> {count}</span>
-        <span> {totalAmount}</span>
-      </div>
+        <li class="list-group-item d-flex justify-content-between lh-condensed">
+          <div>
+            <h6 class="my-0">{name}</h6>
+            <small class="text-muted">{count}</small>
+          </div>
+          <span class="text-muted">${totalAmount}</span>
+        </li>
     );
   }
 }
