@@ -7,38 +7,20 @@ var messageCount =0;
 
 function Heading(props) {
   const modeName = props.modeName;
+  const checked = (props.modeName == "Bill") ? "checked" : "";
+
   return (
-   <h4 class="d-flex justify-content-between align-items-center mb-3">
-        <span class="text-muted">{modeName}</span>
-        <span class="badge badge-secondary badge-pill">3</span>
+
+   <h4 class="d-flex justify-content-between align-items-center">
+        <span class="text-muted mb-1">{modeName}</span>
+        <div class="custom-switch custom-switch-sm custom-switch-label-io">
+          <input class="custom-switch-input" id="example_1" type="checkbox" onClick={props.onClick} defaultChecked={checked}/>
+
+          <label class="custom-switch-btn" htmlFor="example_1"></label>
+        </div>  
   </h4>
   );
 }
-
-function GoToUserButton(props) {
-  return (
-    <button onClick={props.onClick}>
-      Calibration Done
-    </button>
-  );
-}
-
-function GoToAdminButton(props) {
-  return (
-    <button onClick={props.onClick}>
-      Back to Calbiration
-    </button>
-  );
-}
-
-function CollateOrderButton(props){
-  return (
-    <button onClick={props.onClick}>
-      Collate Order
-    </button>
-  );
-}
-
 
 function combinePriceColour(props){
   return(
@@ -48,28 +30,11 @@ function combinePriceColour(props){
   );
 }
 
-class PriceList extends React.Component {
-  render() {
-   const combined = combinePriceColour(this.props)
-    return (
-      <div>
-        <ul>
-              {combined.map(pair  =>
-                <li key={pair.color}>
-                <span> {pair.color} </span> 
-                <span> {pair.price} </span> 
-                </li>
-                )} 
-        </ul>
-      </div>
-    );
-  }
-}
+
 
 class ModeControl extends React.Component {
   constructor(props) {
     super(props);
-    this.handleCollateClick = this.handleCollateClick.bind(this);
     this.handleLoginClick = this.handleLoginClick.bind(this);
     this.handleLogoutClick = this.handleLogoutClick.bind(this);
     this.updatemsgReceived = this.updatemsgReceived.bind(this);
@@ -80,7 +45,7 @@ class ModeControl extends React.Component {
                   inputCost2: '',
                   totalNumPlates : 3,
                   msgReceived : 0,
-                  colors:[{key:'blue',price:""},{key:'red',price:""},{key:'white',price:""},{key:'orange',price:""},{key:'pink',price:""}],
+                  colors:[{key:'Blue',price:""},{key:'Red',price:""},{key:'White',price:""},{key:'Orange',price:""},{key:'Pink',price:""}],
                   orderTally: []};
   }
 
@@ -111,10 +76,6 @@ class ModeControl extends React.Component {
     this.setState({inUserMode: false});
   }
 
-  handleCollateClick(e){
-    let totalCost = this.state.orderTally.reduce( (a,b)=> a.count + b.count );
-    console.log(totalCost);
-  }
 
   handlePriceTextChange(newColorObj){
     let colors = this.state.colors
@@ -123,27 +84,24 @@ class ModeControl extends React.Component {
     this.setState({
       colors: colors
     });
-    console.log(this.state.colors);
   }
 
   render() {
     const inUserMode = this.state.inUserMode;
     const msgReceived = this.state.msgReceived;
-    let modeButton;
-    let collateButton;
-    let collateList;
+    let modeButton;  
     let adminInput;
     let heading;
+    let orderTotal;
     const rows = [];
     const orderLine = [];
+    let logo = "/static/logonew.png"
 
     let uMode = [];
     let aMode = [];
 
     if(inUserMode){  
-      heading       = <Heading modeName='Bill' />;
-      modeButton    = <GoToAdminButton key="abutton" onClick={this.handleLogoutClick} />;
-      collateButton = <CollateOrderButton key="lol" onClick={this.handleCollateClick} />;
+      heading       = <Heading onClick={this.handleLogoutClick} key="toggle" modeName='Bill' />;
       this.state.orderTally.forEach( (orderTally) => {
           let colorObj   = this.state.colors.find(x=>x.key==orderTally.key)
           orderLine.push(
@@ -153,16 +111,17 @@ class ModeControl extends React.Component {
               colorObj = {colorObj  }
             />
       )});
-
+      orderTotal = <OrderTotal
+                      key     = "orderTotal"
+                      orders  = {this.state.orderTally}
+                      colors  = {this.state.colors    }
+                   />
       uMode.push(heading)
       uMode.push(orderLine)
-      uMode.push(modeButton)
-      uMode.push(collateButton)
+      uMode.push(orderTotal)
     } 
     else{
-      heading       = <Heading modeName='Calibration' />;
-    	modeButton = <GoToUserButton key="ubutton" onClick={this.handleLoginClick} />;
-    	collateList = <PriceList items={this.state.items} colors ={this.state.colors}/>
+      heading    = <Heading onClick={this.handleLoginClick} key="toggle" modeName='Price Settings' />;
       this.state.colors.forEach( (colorObj) => {
           rows.push(
             <ColorRow
@@ -173,29 +132,26 @@ class ModeControl extends React.Component {
       )});
       aMode.push(heading)
       aMode.push(rows)
-      aMode.push(modeButton)
     }
+
     return (
-      <div class="row">
-        <div class="col-md-4 order-md-2 mb-4"></div> 
+      <div class="row align-items-center">
+        <div class="col-md-4 order-md-2 mb-4"/> 
         <div class="col-md-4 order-md-2 mb-4"> 
+            <div class="text-center">
+                <img src={logo} height="120" />
+            </div>
+            <hr/>
               <ul class="list-group mb-3">
                 {aMode}
                 {uMode}
               </ul>
         </div>
-        <div class="col-md-4 order-md-2 mb-4"></div>
-      </div>
+        <div class="col-md-4 order-md-2 mb-4"/> 
+       </div>
     );
   }
 }
-
-/*
-{orderLine}
-        {rows}
-        {collateList}
-        {modeButton}
-        {collateButton}*/
 
 class ColorRow extends React.Component {
   constructor(props) {
@@ -212,44 +168,27 @@ class ColorRow extends React.Component {
   render() {
     const name = this.props.colorObj.key;
     const id   = name + "_form" ;
+    let padding = 6-name.length;
+    let padded_name = name.padEnd(padding); 
     return (
-
-
-
-
-
       <li class="list-group-item d-flex justify-content-between lh-condensed">
-        <div>
-          <form class="form-inline">
-            <div class="form-group mx-sm-3 mb-2">
-              <h6 class="my-0">
-                <label for={id}>{name}</label> 
-              </h6>  
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text">£</span>
-                  </div> 
-                  <small class="text-muted">
-                    <input id={id}  class="form-control" value={this.state.value} onChange={this.handlePriceTextChange} /> 
-                  </small>
-                </div>
-            </div>
-          </form>    
+        <div class="col">
+          <label class="mt-2" htmlFor={id}>
+            <h6 class="my-0"> {padded_name} </h6> 
+          </label> 
+        </div>
+        <div class="col-sm-7">
+          <div class="input-group">
+            <div class="input-group-prepend">
+              <span class="input-group-text">£</span>
+            </div> 
+            <input id={id}  class="form-control" placeholder="0.00" value={this.state.value} onChange={this.handlePriceTextChange} />
+          </div>         
         </div>
       </li>
     );
   }
 }
-
-/*
-
-  <div class="form-group mx-sm-3 mb-2">
-    <label for="inputPassword2" class="sr-only">Password</label>
-    <input type="password" class="form-control" id="inputPassword2" placeholder="Password">
-  </div>
-
-  */
-
 
 class OrderLine extends React.Component {
   constructor(props) {
@@ -269,12 +208,58 @@ class OrderLine extends React.Component {
             <h6 class="my-0">{name}</h6>
             <small class="text-muted">{count}</small>
           </div>
-          <span class="text-muted">${totalAmount}</span>
+          <span class="text-muted">£ {totalAmount}</span>
         </li>
     );
   }
 }
 
+class OrderTotal extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+
+  render() {
+    let colors = this.props.colors
+    let orders = this.props.orders
+    let orderLineTotal = orders.map(orderLine=>{
+      let colorObj = colors.find(x=>x.key==orderLine.key);
+      return parseFloat(orderLine.count) * parseFloat(colorObj.price)
+    })
+
+    let subTotal=0;
+    if(orders.length){ subTotal = orderLineTotal.reduce((a,b)=>a+b); }
+    let serviceCharge = 0.125*subTotal;
+    let total = subTotal + serviceCharge;
+    let subTotal2dp      = subTotal.toFixed(2);
+    let serviceCharge2dp = serviceCharge.toFixed(2);
+    let total2dp         = total.toFixed(2);
+
+    return (
+    <div class="list-group-item">
+        <div class="d-flex justify-content-between lh-condensed">
+          <div> <h6 class="my-0">Subtotal : </h6> </div>
+          <span>£{subTotal2dp}</span>
+        </div>
+        
+        <div class="d-flex justify-content-between lh-condensed">
+          <div> <h6 class="my-0">Service Charge : </h6> </div>
+          <span>£{serviceCharge2dp}</span>
+        </div>
+
+        <div class="d-flex justify-content-between lh-condensed">
+          <div> <h6 class="my-0">Total : </h6> </div>
+          <span>£{total2dp}</span>
+        </div>
+    </div>      
+    );
+  }
+}
+
+
+/*
+
+*/
 
 var element = <ModeControl />
 const webPage = ReactDOM.render(element,
