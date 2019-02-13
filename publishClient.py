@@ -7,9 +7,15 @@ import random
 num = random.random()
 print (num)
 
-if(num <0.5):
-	MSG_INFO = client.publish("IC.Embedded/IOS/test","blue")
+if(num <0.2):
+	MSG_INFO = client.publish("IC.Embedded/IOS/test","Blue")
+elif(num<0.4):
+	MSG_INFO = client.publish("IC.Embedded/IOS/test","Red")
+elif(num<0.6):
+	MSG_INFO = client.publish("IC.Embedded/IOS/test","Orange")
+elif(num<0.8):
+	MSG_INFO = client.publish("IC.Embedded/IOS/test","White")
 else:
-	MSG_INFO = client.publish("IC.Embedded/IOS/test","red")
+	MSG_INFO = client.publish("IC.Embedded/IOS/test","Pink")
 
 print(mqtt.error_string(MSG_INFO.rc))
