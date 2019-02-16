@@ -1,5 +1,7 @@
 import paho.mqtt.client as mqtt
 import json
+#Client subscribes to MQTT broker and uses certificates which can be 
+#used instead of our javascript application to listen and debug the messages sent by device.
 
 # The callback for when the client receives a CONNACK response from the server.
 def on_connect(client, userdata, flags, rc):

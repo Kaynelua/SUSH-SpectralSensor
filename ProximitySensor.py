@@ -12,7 +12,7 @@ class ProximitySensor:
 		self.bus = smbus.SMBus(1)
 		self.setLedLevel(20)
 
-	def getProximity(self):
+	def getProximity(self):			#Reads proximity reading 
 		write(self.bus,0x80,0x08)
 		while(not (read(self.bus,0x80)&0x20)):
 			pass
@@ -20,7 +20,7 @@ class ProximitySensor:
 		d = h << 8 | read(self.bus,0x88)
 		return d
 
-	def setLedLevel(self,lvl:int):
+	def setLedLevel(self,lvl:int):	#Control LED Level
 		if(lvl >=0 and lvl <= 20):
 			write(self.bus,0x83,lvl)
 

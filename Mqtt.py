@@ -1,9 +1,7 @@
 import paho.mqtt.client as mqtt
 
-#MSG_INFO = client.publish("IC.Embedded/IOS/test","123hello")
 
-
-class Mqtt():
+class Mqtt():	#Connects to MQTT broker upon construction and sends messages to broker upon detection of colored plate.
 
 	def __init__(self):
 		self.client = mqtt.Client(transport = "websockets")
