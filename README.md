@@ -9,7 +9,9 @@ Upon detection of a colored plate, a message containing the color of the plate w
 How to run the application:
 
 1.Setup Web application to subscribe to the MQTT Broker and listen for incoming messages sent on preset topic - From repository root directory, $cd my_app to enter application folder and then run $python3 flask_app.py and run web application on browser via local directory : "http://127.0.0.1:5000/"
+
 2. Go back to root repository folder and run $python3 main.py to start automatic detection of plates. Upon detection of a plate, message wil be sent by device to the MQTT broker and be received on the web application to update the orders and bill in real time.
+
 3. For simulation purposes, one can also run $python3 publishClient.py to simulate message sending which sends a random color to the MQTT broker. 
 
 Brief Description of files:
