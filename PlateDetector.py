@@ -21,20 +21,26 @@ class PlateDetector():
 		self.p = ps.ProximitySensor()
 		self.interruptPin = 17
 		self.p.setHighThreshold(10000)
-		GPIO.setup(self.interruptPin,GPIO.IN,pull_up_down=GPIO.PUD_UP)	#sets up a hardware interrupt which is called when proximity sensor goes high
-		GPIO.add_event_detect(self.interruptPin,GPIO.FALLING,callback=self.sensorEvent) # calls sensorEvent upon detection of interrupt
+		# Set up a HW Interrupt - Triggered by Proximity Sensor
+		GPIO.setup(self.interruptPin,GPIO.IN,pull_up_down=GPIO.PUD_UP)	
+		# Threaded callback upon Interrupt, Call sensorEvent
+		GPIO.add_event_detect(self.interruptPin,GPIO.FALLING,callback=self.sensorEvent) 
 		self.p.setInterrupt(1)
 		self.client = mq.Mqtt()
 
 	def autoScanning(self):			
-		#Gets the color(intensities at 6 different freq), convert to string representation and send it to MQTT broker
+		# Reads sensor readings from Queue
+		# Convert to Colour (str)
+		# Send to MQTT broker
 		res = self.getResult()
 		colour = self.evalColour(res)
 		print(colour)
 		self.client.send("IC.Embedded/IOS/detection",colour)
 
+	# Learn colour based on intensities from 6 channels (F.P)
+	# Uses incremental update of average for memory efficiency
+	def train(self,c):		
 
-	def train(self,c):		#Training the spectral sensor to convert intensities from 6 channels(F.P) to the name of the colour(string)
 		val = pd.getResult()
 		if c not in self.refValues.keys():
 			self.refValues[c] = (val,1)
@@ -44,11 +50,11 @@ class PlateDetector():
 			self.refValues[c] = (newVal,n+1)
 
 	def sensorEvent(self,pin):
-		# Read Spectral Sensor and Store in Queue
+		# Read Spectral Sensor
 		self.s.ledDrv(1)
 		self.s.setBank(3)
 		r = self.s.readAllCal()
-		#Stores in queue immediately
+		# Stores in queue immediately
 		self.resultQueue.put_nowait(r)		
 		self.s.ledDrv(0)
 		# Open and Close to release plate
@@ -56,6 +62,9 @@ class PlateDetector():
 		time.sleep(0.1)
 		servo.close()
 		# Reset Interrupt on Proximity Sensor
+		# Need to disable detection in PiZero as 
+		# resetting Proximity Sensor Interrupt register
+		# Triggers another interrupt
 		GPIO.remove_event_detect(self.interruptPin)
 		self.p.setInterrupt(0)
 		GPIO.add_event_detect(self.interruptPin,GPIO.FALLING,callback=self.sensorEvent)
@@ -63,25 +72,28 @@ class PlateDetector():
 
 	def getResult(self):
 		return self.resultQueue.get(block=True)
-
+	
+	#Use Least Square approach to determine colour from sensor readings
 	def evalColour(self,val):
 		minError  = np.inf
 		minColour = None
 		for c in self.refValues.keys():
 			(ref,n) = self.refValues[c]
-			error = np.mean(((val-ref)**2))	#Use least square approach to decide which color the detected plate matches to from training data
+			error = np.mean(((val-ref)**2))	
 			if(error < minError):
 				minError = error
 				minColour = c
 		return minColour
 
-	def store(self):	#Store training data into pickle file
+	#Store training data into pickle file
+	def store(self):	
 		try:
 			pickle.dump(self.refValues, open("data.pickle", "wb"))
 		except Exception as e:
 			print("Error :" + str(e))
 
-		def loadReference(self):	#Loads training data into pickle file
+	#Loads training data into pickle file
+	def loadReference(self):	
 		try:
 			colourdict= pickle.load(open("data.pickle", "rb"))
 			return colourdict

@@ -1,7 +1,8 @@
 import paho.mqtt.client as mqtt
 
-
-class Mqtt():	#Connects to MQTT broker upon construction and sends messages to broker upon detection of colored plate.
+# Connects to MQTT broker upon construction and 
+# sends messages to broker upon detection of colored plate.
+class Mqtt():	
 
 	def __init__(self):
 		self.client = mqtt.Client(transport = "websockets")

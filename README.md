@@ -5,7 +5,7 @@ Group name : IOS(Inventors Of Stuff)
 
 ## SUSH
 
-Our device SUSH uses the spectral sensor provided in conjunction with a proximity sensor to automatically detect the color of each colored plate in a sushi restaurant which will be collated for instant and errorless bill generation. 
+Our device SUSH uses the Spectral Sensor ([AS7262](https://ams.com/as7262)) provided in conjunction with a Proximity Sensor ([VCNL4010](https://www.vishay.com/doc?83462)) to automatically detect the color of each colored plate in a sushi restaurant. The totals will be collated for instant and error free bill generation. 
 
 Upon detection of a colored plate, a message containing the color of the plate will be sent to the MQTT Broker which in turn will trigger a callback on the Web server subscribed to the MQTT broker. The price of each colored plate will be configured by restaurant owners/managers beforehand and upon receiving the message containing the color of the plate detected, render the bill dynamically with React Front-end.
 

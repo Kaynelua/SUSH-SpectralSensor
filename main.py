@@ -16,7 +16,9 @@ detector = pd.PlateDetector()
 while(True):
 
 	try:
-		"""#Training to convert tuple of 6 f.p numbers to a string representing its color to minimize message length.	
+		detector.autoScanning() #Runs the integrated process of entire system
+		"""
+		#Training to convert tuple of 6 f.p numbers to a string representing its color to minimize message length.	
 		for i in range(0,5,1):
 			detector.train("Red")
 		for i in range(0,5,1):
@@ -31,7 +33,6 @@ while(True):
 		print(detector.evalColour(detector.getResult())) 		
 		print(detector.refValues)
 		"""	
-		detector.autoScanning() #Runs the integrated process of entire system
 	except Exception as e:
 		print("Error : " + str(e))
 		GPIO.cleanup()
